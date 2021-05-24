@@ -47,7 +47,7 @@ DATABASE = {
 
 7. Run Flask
 ```bash
-run flask
+flask run
 ```
 
 ## Usage
