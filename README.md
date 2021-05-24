@@ -52,8 +52,15 @@ run flask
 
 ## Usage
 
-1. To view the documentation and test the API go to:
+To view the documentation and test the API go to:
 
 ```browser
 http://127.0.0.1:5000/api/docs
+```
+## Tests
+
+To run pytest just execute this command form terminal in the project folder:
+
+```
+pytest
 ```

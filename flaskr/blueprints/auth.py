@@ -23,11 +23,9 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 def login():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-
     user = User.authenticate(email,password)
     if user is None:
         return jsonify(ApiResponse(0,False,"Invalid credentials").toJson()), 401
-
     access_token = create_access_token(identity=user.to_dict())
     return jsonify(access_token=access_token)
 

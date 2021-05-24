@@ -1,12 +1,13 @@
 from ..database import db;
 from sqlalchemy_serializer import SerializerMixin
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import load_only, relationship
 from werkzeug.security import check_password_hash
+from sqlalchemy import Table, Column, Integer, ForeignKey
 
 class User(db.Model, SerializerMixin):
     __tablename__ = "users"
 
-    serialize_only = ('id', 'email','fullname','photo', 'created_at')
+    serialize_only = ('id', 'email','fullname','photo', 'created_at','password')
 
     id = db.Column(db.Integer(),primary_key=True)
     email = db.Column(db.String(50), nullable=False)
