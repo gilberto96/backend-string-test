@@ -19,7 +19,7 @@ venv\Scripts\activate.bat
 4. Install python libraries:
 
 ```bash
-pip freeze > requirements.txt
+pip install -r requirements.txt
 ```
 
 5. Set enviroment variables:
