@@ -2,14 +2,13 @@ import functools
 from re import I
 from ..models.user import User
 from ..models.responses import ApiResponse
-from flask_jwt import jwt_required, current_identity
 
 from flask import (
     Blueprint, flash, g, json, redirect, render_template, request, session, url_for, jsonify
 )
 from werkzeug.security import generate_password_hash
 
-bp = Blueprint('auth', __name__, url_prefix='/security')
+bp = Blueprint('security', __name__, url_prefix='/security')
 
 @bp.route('/users/', methods=['POST'])
 def register():

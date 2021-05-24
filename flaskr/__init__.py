@@ -1,9 +1,8 @@
 import os
 from flask import Flask, url_for, jsonify
 from sqlalchemy_utils import create_database, database_exists
-from flask_jwt import JWT
-from .models.user import User
 from .config import *
+from flask_jwt_extended import JWTManager
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -13,7 +12,8 @@ def create_app(test_config=None):
         SQLALCHEMY_TRACK_MODIFICATIONS = DATABASE["SQLALCHEMY_TRACK_MODIFICATIONS"],
         DEBUG = True,
         JWT_AUTH_USERNAME_KEY = "email",
-        JWT_AUTH_URL_RULE = "/auth/login"
+        JWT_AUTH_URL_RULE = "/auth/login",
+        JWT_SECRET_KEY = "j/6Ds!3#dmOJVS3P_i!^>eGaC@sw(Z"
     )
     
     app.url_map.strict_slashes = False
@@ -36,39 +36,31 @@ def create_app(test_config=None):
 
     from .models.user import User
     from .models.task import Task
+    from .models.tokenblocklist import TokenBlockList
     from .database import db
     with app.app_context():
         db.init_app(app)
         db.create_all()
 
     # Blueprints
-    from .blueprints import security
+    from .blueprints import security, schedule, auth
     app.register_blueprint(security.bp)
-    from .blueprints import schedule
     app.register_blueprint(schedule.bp)
+    app.register_blueprint(auth.bp)
 
     # Swagger UI
     from .blueprints import swagger
     app.register_blueprint(swagger.swaggerui_blueprint)
 
     # JWT
-    jwt = JWT(app, User.authenticate, User.identity)
-
-
-    @app.route("/site-map")
-    def site_map():
-        links = []
-        for rule in app.url_map.iter_rules():
-            # Filter out rules we can't navigate to in a browser
-            # and rules that require parameters
-            if "GET" in rule.methods and has_no_empty_params(rule):
-                url = url_for(rule.endpoint, **(rule.defaults or {}))
-                links.append((url, rule.endpoint))
-        return jsonify(links)
+    # jwt = JWT(app, User.authenticate, User.identity)
+    jwt = JWTManager(app)
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        token = TokenBlockList.query.filter_by(jti=jti).first()
+        return token is not None
 
     return app
 
-def has_no_empty_params(rule):
-    defaults = rule.defaults if rule.defaults is not None else ()
-    arguments = rule.arguments if rule.arguments is not None else ()
-    return len(defaults) >= len(arguments)
+
